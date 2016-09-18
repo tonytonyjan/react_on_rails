@@ -3,10 +3,9 @@
   <head>
     <title>ReactOnRails</title>
     <%= csrf_meta_tags %>
-    <%= stylesheet_link_tag    'application', media: 'all' %>
   </head>
-
   <body>
-    <%= yield %>
+    <div id="app"><%= yield %></div>
+    <%= javascript_include_tag '/assets/client' %>
   </body>
 </html>
