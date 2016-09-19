@@ -21,5 +21,9 @@ module ReactOnRails
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
+    require 'webpack_stats'
+    ActiveSupport.on_load(:action_view) do
+      include WebpackStats::Helper
+    end
   end
 end

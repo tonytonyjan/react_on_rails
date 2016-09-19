@@ -4,8 +4,9 @@ module.exports = {
     server: './app/assets/server.js'
   },
   output: {
-    filename: '[name].js',
-    path: __dirname + '/public/assets'
+    filename: '[name]-[hash].js',
+    path: __dirname + '/public/assets',
+    publicPath: '/assets/'
   },
   resolve: {
     modules: [
@@ -15,12 +16,22 @@ module.exports = {
     ]
   },
   module: {
-    loaders: [
-      {
-        test: /\.jsx?$/,
-        exclude: /node_modules/,
-        loader: 'babel'
-      }
-    ]
-  }
+    loaders: [{
+      test: /\.jsx?$/,
+      exclude: /node_modules/,
+      loader: 'babel'
+    }]
+  },
+  plugins: [
+    function() {
+      this.plugin('done', function(stats) {
+        require('fs').writeFileSync(__dirname + '/stats.json', JSON.stringify(stats.toJson({
+          source: false,
+          chunks: false,
+          modules: false,
+          children: false
+        })))
+      })
+    }
+  ]
 }

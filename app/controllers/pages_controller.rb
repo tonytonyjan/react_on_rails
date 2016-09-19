@@ -1,7 +1,11 @@
 class PagesController < ApplicationController
   def home
-    context = ExecJS.compile(File.read('./public/assets/server.js'))
-    result = context.exec <<~EOS
+    if Rails.env.production?
+      @context ||= ExecJS.compile(File.read('./public/assets/server.js'))
+    else
+      @context = ExecJS.compile(File.read('./public/assets/server.js'))
+    end
+    result = @context.exec <<~EOS
       var error, redirectLocation, renderProps
       ReactRouter.match({routes: routes.default, location: #{request.path.to_json}}, function(_error, _redirectLocation, _renderProps){
         error = _error
@@ -40,7 +44,7 @@ class PagesController < ApplicationController
         </head>
         <body>
           <div id="app">#{html}</div>
-          #{helpers.javascript_include_tag '/assets/client'}
+          #{helpers.javascript_include_tag 'client'}
         </body>
       </html>
     EOS
