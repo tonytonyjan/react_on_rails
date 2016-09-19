@@ -9,19 +9,24 @@ class PagesController < ApplicationController
         renderProps = _renderProps
       })
       if (error) {
-        return [500, error]
+        return { status: 500, error: error }
       } else if (redirectLocation) {
-        return [302, redirectLocation]
+        return {status: 302, location: redirectLocation}
       } else if (renderProps) {
-        return [200, ReactDOMServer.renderToString(
-          React.createElement(ReactRouter.RouterContext, renderProps)
-        )]
+        return {
+          status: renderProps.routes[2].path == '*' ? 404 : 200,
+          body: ReactDOMServer.renderToString(
+            React.createElement(ReactRouter.RouterContext, renderProps)
+          )
+        }
       }
     EOS
-    case result.first
+    case result['status']
     when 500 then head 500
-    when 302 then redirect_to result.last.pathname + result.last.search
-    when 200 then render text: render_full_page(result.last)
+    when 302
+      redirect_to result['location'].pathname + result['location'].search
+    when 200, 404
+      render text: render_full_page(result['body']), status: result['status']
     end
   end
 
@@ -31,11 +36,11 @@ class PagesController < ApplicationController
       <html>
         <head>
           <title>React on Rails</title>
-          #{ helpers.csrf_meta_tags }
+          #{helpers.csrf_meta_tags}
         </head>
         <body>
           <div id="app">#{html}</div>
-          #{ helpers.javascript_include_tag '/assets/client' }
+          #{helpers.javascript_include_tag '/assets/client'}
         </body>
       </html>
     EOS
