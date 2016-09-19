@@ -2,7 +2,7 @@ import React from 'react'
 import {Router, IndexRoute, Route, browserHistory} from 'react-router'
 import {App, Home, About, NoMatch} from 'pages'
 
-export default (
+export default (history=browserHistory) => (
   <Router history={browserHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={Home}/>

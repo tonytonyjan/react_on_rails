@@ -1,13 +1,14 @@
 class PagesController < ApplicationController
   def home
     if Rails.env.production?
-      @context ||= ExecJS.compile(File.read('./public/assets/server.js'))
+      @context ||= load_context
     else
-      @context = ExecJS.compile(File.read('./public/assets/server.js'))
+      @context = load_context
     end
+
     result = @context.exec <<~EOS
       var error, redirectLocation, renderProps
-      ReactRouter.match({routes: routes.default, location: #{request.path.to_json}}, function(_error, _redirectLocation, _renderProps){
+      ReactRouter.match({routes: getRoutes.default(), location: #{request.path.to_json}}, function(_error, _redirectLocation, _renderProps){
         error = _error
         redirectLocation = _redirectLocation
         renderProps = _renderProps
@@ -34,6 +35,13 @@ class PagesController < ApplicationController
     end
   end
 
+  private
+
+  def load_context
+    path = Rails.root.join('public' + helpers.javascript_path('server'))
+    ExecJS.compile(File.read(path))
+  end
+
   def render_full_page(html)
     <<~EOS
       <!DOCTYPE html>
@@ -49,4 +57,5 @@ class PagesController < ApplicationController
       </html>
     EOS
   end
+
 end

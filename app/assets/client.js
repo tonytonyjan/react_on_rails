@@ -1,6 +1,14 @@
+import store from 'store'
+import getRoutes from 'getRoutes'
+
 import React from 'react'
-import routes from 'routes'
-import {render} from 'react-dom'
+import { render } from 'react-dom'
+import { Provider } from 'react-redux'
+import { syncHistoryWithStore } from 'react-router-redux'
+import { browserHistory } from 'react-router'
+
+const history = syncHistoryWithStore(browserHistory, store)
+const routes = getRoutes(history)
 
 var app = document.getElementById('app')
-render(routes, app)
+render(<Provider store={store}>{routes}</Provider>, app)
