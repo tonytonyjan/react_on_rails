@@ -4,12 +4,13 @@ module.exports = {
     server: './app/assets/server.js'
   },
   output: {
-    filename: '[name]-[hash].js',
+    filename: '[name].js',
     path: __dirname + '/public/assets',
     publicPath: '/assets/'
   },
   resolve: {
     modules: [
+      __dirname + '/app/assets/containers',
       __dirname + '/app/assets/components',
       __dirname + '/app/assets',
       'node_modules'

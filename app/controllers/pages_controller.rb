@@ -7,6 +7,7 @@ class PagesController < ApplicationController
     end
 
     result = @context.exec <<~EOS
+      var store = getStore.default()
       var error, redirectLocation, renderProps
       ReactRouter.match({routes: getRoutes.default(), location: #{request.path.to_json}}, function(_error, _redirectLocation, _renderProps){
         error = _error
@@ -21,8 +22,11 @@ class PagesController < ApplicationController
         return {
           status: renderProps.routes[2].path == '*' ? 404 : 200,
           body: ReactDOMServer.renderToString(
-            React.createElement(ReactRouter.RouterContext, renderProps)
-          )
+            React.createElement(
+              ReactRedux.Provider, { store: store }, React.createElement(ReactRouter.RouterContext, renderProps)
+            )
+          ),
+          state: store.getState()
         }
       }
     EOS
@@ -31,7 +35,7 @@ class PagesController < ApplicationController
     when 302
       redirect_to result['location'].pathname + result['location'].search
     when 200, 404
-      render text: render_full_page(result['body']), status: result['status']
+      render text: render_full_page(result['body'], result['state']), status: result['status']
     end
   end
 
@@ -42,7 +46,7 @@ class PagesController < ApplicationController
     ExecJS.compile(File.read(path))
   end
 
-  def render_full_page(html)
+  def render_full_page(html = nil, state={})
     <<~EOS
       <!DOCTYPE html>
       <html>
@@ -52,6 +56,7 @@ class PagesController < ApplicationController
         </head>
         <body>
           <div id="app">#{html}</div>
+          <script>window.__PRELOADED_STATE__ = #{state.to_json}</script>
           #{helpers.javascript_include_tag 'client'}
         </body>
       </html>

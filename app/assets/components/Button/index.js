@@ -1,5 +1,5 @@
 import React from 'react'
 
 export default props => (
-  <button>{props.text}</button>
+  <button onClick={props.onClick}>{props.text}</button>
 )
