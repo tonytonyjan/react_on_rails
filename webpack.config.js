@@ -1,10 +1,16 @@
+const __PRODUCTION__ = process.env['NODE_ENV'] == 'production'
+var webpack = require('webpack')
+if(__PRODUCTION__){
+  var UglifyJsPlugin = require('webpack/lib/optimize/UglifyJsPlugin')
+}
+
 module.exports = {
   entry: {
     client: './app/assets/client.js',
     server: './app/assets/server.js'
   },
   output: {
-    filename: '[name].js',
+    filename: __PRODUCTION__ ? '[name]-[hash].js' : '[name].js',
     path: __dirname + '/public/assets',
     publicPath: '/assets/'
   },
@@ -33,6 +39,12 @@ module.exports = {
           children: false
         })))
       })
-    }
+    },
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: __PRODUCTION__ ? "'production'" : "'development'"
+      }
+    }),
+    __PRODUCTION__ ? new UglifyJsPlugin() : _ => _
   ]
 }
